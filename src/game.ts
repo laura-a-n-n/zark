@@ -67,6 +67,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
       const button = document.createElement("a");
       const decodedOption = decodeHTMLEntities(option).replace(/<\/?div>|<br>/g, "");
       button.style.display = "block";
+      button.tabIndex = 0;
       button.innerHTML = `&gt; ${decodedOption}`;
       button.addEventListener("click", () => {
         current_node = target;
@@ -82,6 +83,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
       const randomTarget = possibleDestinations[randomIndex];
       decisionsContainer.innerHTML = "<p>Decisions:</p>";
       const button = document.createElement("a");
+      button.tabIndex = 0;
       button.innerHTML = "&gt; The only option is to continue...";
       button.addEventListener("click", () => {
         current_node = randomTarget;
