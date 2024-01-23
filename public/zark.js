@@ -2246,7 +2246,7 @@ var updateGame = function() {
   valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
   const targets = Array.from(flowchartGraph.outNeighbors(current_node));
   if (targets.length === 0) {
-    valueElement.textContent = "Thanks for playing!";
+    valueElement.innerHTML += "<p>[That's all for now.]</p>";
     decisionsContainer.innerHTML = "";
     return;
   }
