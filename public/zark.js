@@ -2264,7 +2264,7 @@ var getGraphFromFlowchartTree = (tree) => {
     const target = element.attributes.target;
     const value = element.attributes.value;
     const isEdge = element.attributes.edge;
-    if (isEdge && source !== null && target !== null) {
+    if (isEdge && source !== undefined && target !== undefined) {
       edges[id] = [source, target];
       if (value !== null) {
         flowchartGraph.addEdge(source, target, { label: value });
@@ -2284,18 +2284,6 @@ var getGraphFromFlowchartTree = (tree) => {
     if (isEdgeLabel && edgeId !== undefined && value !== undefined) {
       const [source, target] = edges[edgeId];
       flowchartGraph.setEdgeAttribute(source, target, "label", value);
-    }
-  }
-  for (const node of flowchartGraph.nodes()) {
-    const targets = Array.from(flowchartGraph.outNeighbors(node));
-    const decisions = [];
-    for (const target of targets) {
-      const edgeAttributes = flowchartGraph.getEdgeAttributes(node, target);
-      if (edgeAttributes && "label" in edgeAttributes) {
-        decisions.push(edgeAttributes["label"]);
-      } else {
-        decisions.push(target);
-      }
     }
   }
   return flowchartGraph;

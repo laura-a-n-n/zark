@@ -2,7 +2,7 @@ import type { XmlNode } from "fsp-xml-parser";
 import DiGraph from "graphology";
 
 export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
-  // Now we will through the tree and construct a graph
+  // Now we will go through the tree and construct a graph
   const flowchartGraph = new DiGraph();
 
   // Dictionary to store edges temporarily
@@ -46,7 +46,7 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
     const value = element.attributes.value;
     const isEdge = element.attributes.edge;
 
-    if (isEdge && source !== null && target !== null) {
+    if (isEdge && source !== undefined && target !== undefined) {
       edges[id] = [source, target];
       if (value !== null) {
         flowchartGraph.addEdge(source, target, { label: value });
@@ -71,29 +71,6 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
       const [source, target] = edges[edgeId];
       flowchartGraph.setEdgeAttribute(source, target, "label", value);
     }
-  }
-
-  // Iterate through nodes in the graph
-  for (const node of flowchartGraph.nodes()) {
-    const targets = Array.from(flowchartGraph.outNeighbors(node));
-
-    const decisions: (string | undefined)[] = [];
-
-    // Iterate through targets
-    for (const target of targets) {
-      const edgeAttributes = flowchartGraph.getEdgeAttributes(node, target);
-
-      if (edgeAttributes && "label" in edgeAttributes) {
-        decisions.push(edgeAttributes["label"]);
-      } else {
-        decisions.push(target);
-      }
-    }
-
-    // Now you have 'value', 'targets', 'sources', and 'decisions' for the current node
-    // const value = flowchartGraph.getNodeAttribute(node, 'label');
-    // const sources = Array.from(flowchartGraph.inNeighbors(node));
-    // console.log({ value, targets, sources, decisions });
   }
 
   return flowchartGraph;
