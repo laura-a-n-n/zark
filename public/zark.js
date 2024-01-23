@@ -2236,130 +2236,79 @@ var getXMLContents = async (filePath) => {
   return parse(xmlContents);
 };
 
-// src/zark.ts
+// src/drawio-to-flowchart.ts
 var import_graphology = __toESM(require_graphology_umd_min(), 1);
-var updateGame = function() {
-  if (!gameContainer || !currentNodeElement || !valueElement || !decisionsContainer) {
-    throw new Error("Did not find expected dom elements.");
+var getGraphFromFlowchartTree = (tree) => {
+  const flowchartGraph = new import_graphology.default;
+  const edges = {};
+  for (const element of tree) {
+    if (!element.attributes) {
+      continue;
+    }
+    const id = element.attributes.id;
+    const source = element.attributes.source;
+    const target = element.attributes.target;
+    const value = element.attributes.value;
+    const style = element.attributes.style;
+    const isEdgeLabel = style && style.startsWith("edgeLabel");
+    if (!isEdgeLabel && value !== undefined && source === undefined && target === undefined) {
+      flowchartGraph.addNode(id, { label: value });
+    }
   }
-  const nodeLabel = flowchartGraph.getNodeAttribute(current_node, "label");
-  valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
-  const targets = Array.from(flowchartGraph.outNeighbors(current_node));
-  if (targets.length === 0) {
-    valueElement.innerHTML += "<p>[That's all for now.]</p>";
-    decisionsContainer.innerHTML = "";
-    return;
+  for (const element of tree) {
+    if (!element.attributes) {
+      continue;
+    }
+    const id = element.attributes.id;
+    const source = element.attributes.source;
+    const target = element.attributes.target;
+    const value = element.attributes.value;
+    const isEdge = element.attributes.edge;
+    if (isEdge && source !== null && target !== null) {
+      edges[id] = [source, target];
+      if (value !== null) {
+        flowchartGraph.addEdge(source, target, { label: value });
+      } else {
+        flowchartGraph.addEdge(source, target);
+      }
+    }
   }
-  decisionsContainer.innerHTML = "<p>Decisions:</p>";
-  let shouldPickRandom = true;
-  targets.forEach((target, index) => {
-    const edgeAttributes = flowchartGraph.getEdgeAttributes(current_node, target);
-    const hasLabel = "label" in edgeAttributes && edgeAttributes["label"];
-    const option = hasLabel ? edgeAttributes["label"] : target;
-    const button = document.createElement("button");
-    shouldPickRandom = shouldPickRandom && !hasLabel;
-    button.innerHTML = decodeHTMLEntities(option);
-    console.log(decodeHTMLEntities(option));
-    button.addEventListener("click", () => {
-      current_node = target;
-      updateGame();
-    });
-    decisionsContainer.appendChild(button);
-  });
-  if (shouldPickRandom) {
-    const randomIndex = Math.floor(Math.random() * targets.length);
-    const randomTarget = targets[randomIndex];
-    decisionsContainer.innerHTML = "";
-    const button = document.createElement("button");
-    button.innerHTML = "The only option is to continue...";
-    button.addEventListener("click", () => {
-      current_node = randomTarget;
-      updateGame();
-    });
-    decisionsContainer.appendChild(button);
+  for (const element of tree) {
+    if (!element.attributes) {
+      continue;
+    }
+    const edgeId = element.attributes.parent;
+    const value = element.attributes.value;
+    const style = element.attributes.style;
+    const isEdgeLabel = style && style.startsWith("edgeLabel");
+    if (isEdgeLabel && edgeId !== undefined && value !== undefined) {
+      const [source, target] = edges[edgeId];
+      flowchartGraph.setEdgeAttribute(source, target, "label", value);
+    }
   }
+  for (const node of flowchartGraph.nodes()) {
+    const targets = Array.from(flowchartGraph.outNeighbors(node));
+    const decisions = [];
+    for (const target of targets) {
+      const edgeAttributes = flowchartGraph.getEdgeAttributes(node, target);
+      if (edgeAttributes && "label" in edgeAttributes) {
+        decisions.push(edgeAttributes["label"]);
+      } else {
+        decisions.push(target);
+      }
+    }
+  }
+  return flowchartGraph;
 };
-var FILE_PATH = "assets/ZARK.drawio.xml";
-var parsedZarkFile = await getXMLContents(FILE_PATH);
-var zarkTree = parsedZarkFile.root?.children[0].children[0].children[0].children;
-if (!zarkTree) {
-  throw new Error("The tree did not have the expected format.");
-}
-console.log(zarkTree);
-var flowchartGraph = new import_graphology.default;
-var edges = {};
-for (const element of zarkTree) {
-  if (!element.attributes) {
-    continue;
-  }
-  const id = element.attributes.id;
-  const source = element.attributes.source;
-  const target = element.attributes.target;
-  const value = element.attributes.value;
-  const style = element.attributes.style;
-  const isEdgeLabel = style && style.startsWith("edgeLabel");
-  if (!isEdgeLabel && value !== undefined && source === undefined && target === undefined) {
-    flowchartGraph.addNode(id, { label: value });
-  }
-}
-for (const element of zarkTree) {
-  if (!element.attributes) {
-    continue;
-  }
-  const id = element.attributes.id;
-  const source = element.attributes.source;
-  const target = element.attributes.target;
-  const value = element.attributes.value;
-  const isEdge = element.attributes.edge;
-  if (isEdge && source !== null && target !== null) {
-    edges[id] = [source, target];
-    if (value !== null) {
-      flowchartGraph.addEdge(source, target, { label: value });
-    } else {
-      flowchartGraph.addEdge(source, target);
-    }
-  }
-}
-for (const element of zarkTree) {
-  if (!element.attributes) {
-    continue;
-  }
-  const edgeId = element.attributes.parent;
-  const value = element.attributes.value;
-  const style = element.attributes.style;
-  const isEdgeLabel = style && style.startsWith("edgeLabel");
-  if (isEdgeLabel && edgeId !== undefined && value !== undefined) {
-    const [source, target] = edges[edgeId];
-    flowchartGraph.setEdgeAttribute(source, target, "label", value);
-  }
-}
-for (const node of flowchartGraph.nodes()) {
-  const value = flowchartGraph.getNodeAttribute(node, "label");
-  const targets = Array.from(flowchartGraph.outNeighbors(node));
-  const sources = Array.from(flowchartGraph.inNeighbors(node));
-  const decisions = [];
-  for (const target of targets) {
-    const edgeAttributes = flowchartGraph.getEdgeAttributes(node, target);
-    if (edgeAttributes && "label" in edgeAttributes) {
-      decisions.push(edgeAttributes["label"]);
-    } else {
-      decisions.push(target);
-    }
-  }
-  console.log({ value, targets, sources, decisions });
-}
-var gameContainer = document.getElementById("game-container");
-var currentNodeElement = document.getElementById("current-node");
-var valueElement = document.getElementById("value");
-var decisionsContainer = document.getElementById("decisions");
-var current_node = [...flowchartGraph.nodes()][0];
+
+// src/decode-html-entities.ts
 var decodeHTMLEntities = (text) => {
   const entities = [
     ["amp", "&"],
-    ["apos", "\'"],
-    ["#x27", "\'"],
+    ["apos", "'"],
+    ["#x27", "'"],
     ["#x2F", "/"],
-    ["#39", "\'"],
+    ["#39", "'"],
     ["#47", "/"],
     ["lt", "<"],
     ["gt", ">"],
@@ -2370,4 +2319,64 @@ var decodeHTMLEntities = (text) => {
     text = text.replace(new RegExp("&" + entities[i][0] + ";", "g"), entities[i][1]);
   return text;
 };
+
+// src/game.ts
+var getUpdateFunctionFromGraph = (flowchartGraph) => {
+  const gameContainer = document.getElementById("game-container");
+  const currentNodeElement = document.getElementById("current-node");
+  const valueElement = document.getElementById("value");
+  const decisionsContainer = document.getElementById("decisions");
+  let current_node = [...flowchartGraph.nodes()][0];
+  return function updateGame() {
+    if (!gameContainer || !currentNodeElement || !valueElement || !decisionsContainer) {
+      throw new Error("Did not find expected DOM elements.");
+    }
+    const nodeLabel = flowchartGraph.getNodeAttribute(current_node, "label");
+    valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
+    const possibleDestinations = Array.from(flowchartGraph.outNeighbors(current_node));
+    if (possibleDestinations.length === 0) {
+      valueElement.innerHTML += "<p>[That's all for now.]</p>";
+      decisionsContainer.innerHTML = "";
+      return;
+    }
+    decisionsContainer.innerHTML = "<p>Decisions:</p>";
+    let shouldPickRandom = true;
+    possibleDestinations.forEach((target) => {
+      const edgeAttributes = flowchartGraph.getEdgeAttributes(current_node, target);
+      const hasLabel = "label" in edgeAttributes && edgeAttributes["label"];
+      const option = hasLabel ? edgeAttributes["label"] : target;
+      shouldPickRandom = shouldPickRandom && !hasLabel;
+      const button = document.createElement("button");
+      button.innerHTML = decodeHTMLEntities(option);
+      console.log(decodeHTMLEntities(option));
+      button.addEventListener("click", () => {
+        current_node = target;
+        updateGame();
+      });
+      decisionsContainer.appendChild(button);
+    });
+    if (shouldPickRandom) {
+      const randomIndex = Math.floor(Math.random() * possibleDestinations.length);
+      const randomTarget = possibleDestinations[randomIndex];
+      decisionsContainer.innerHTML = "";
+      const button = document.createElement("button");
+      button.innerHTML = "The only option is to continue...";
+      button.addEventListener("click", () => {
+        current_node = randomTarget;
+        updateGame();
+      });
+      decisionsContainer.appendChild(button);
+    }
+  };
+};
+
+// src/zark.ts
+var FILE_PATH = "assets/ZARK.drawio.xml";
+var parsedZarkFile = await getXMLContents(FILE_PATH);
+var zarkTree = parsedZarkFile.root?.children[0].children[0].children[0].children;
+if (!zarkTree) {
+  throw new Error("The tree did not have the expected format.");
+}
+var flowchartGraph = getGraphFromFlowchartTree(zarkTree);
+var updateGame = getUpdateFunctionFromGraph(flowchartGraph);
 updateGame();
