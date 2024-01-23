@@ -21,6 +21,15 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
     // currentNodeElement.textContent = `Current node: ${current_node}`;
     const nodeLabel = flowchartGraph.getNodeAttribute(current_node, "label");
     valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
+    
+    const nodeStyle = flowchartGraph.getNodeAttribute(current_node, "style");
+    const imageUrlRegex = /image=([^;]+)/;
+    const match = imageUrlRegex.exec(nodeStyle);
+    const imageUrl = match ? match[1] : null;
+    if (imageUrl) {
+        const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : ("https://" + imageUrl);
+        valueElement.innerHTML += `<img src="${fullImageUrl}" alt="Zark image">`;
+    }
 
     const possibleDestinations = Array.from(
       flowchartGraph.outNeighbors(current_node),

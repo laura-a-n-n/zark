@@ -30,7 +30,7 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
       source === undefined &&
       target === undefined
     ) {
-      flowchartGraph.addNode(id, { label: value });
+      flowchartGraph.addNode(id, { label: value, style });
     }
   }
 

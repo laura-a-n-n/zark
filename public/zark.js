@@ -2252,7 +2252,7 @@ var getGraphFromFlowchartTree = (tree) => {
     const style = element.attributes.style;
     const isEdgeLabel = style && style.startsWith("edgeLabel");
     if (!isEdgeLabel && value !== undefined && source === undefined && target === undefined) {
-      flowchartGraph.addNode(id, { label: value });
+      flowchartGraph.addNode(id, { label: value, style });
     }
   }
   for (const element of tree) {
@@ -2321,6 +2321,14 @@ var getUpdateFunctionFromGraph = (flowchartGraph) => {
     }
     const nodeLabel = flowchartGraph.getNodeAttribute(current_node, "label");
     valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
+    const nodeStyle = flowchartGraph.getNodeAttribute(current_node, "style");
+    const imageUrlRegex = /image=([^;]+)/;
+    const match = imageUrlRegex.exec(nodeStyle);
+    const imageUrl = match ? match[1] : null;
+    if (imageUrl) {
+      const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : "https://" + imageUrl;
+      valueElement.innerHTML += `<img src="${fullImageUrl}" alt="Zark image">`;
+    }
     const possibleDestinations = Array.from(flowchartGraph.outNeighbors(current_node));
     if (possibleDestinations.length === 0) {
       valueElement.innerHTML += "<p>[That's all for now.]</p>";
