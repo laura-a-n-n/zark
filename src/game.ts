@@ -2,26 +2,28 @@ import type { DirectedGraph } from "graphology";
 import { decodeHTMLEntities } from "./decode-html-entities";
 
 const getImageTagFromNodeStyle = (nodeStyle: string) => {
-    const imageUrlRegex = /image=([^;]+)/;
-    const imageUrlMatch = imageUrlRegex.exec(nodeStyle);
-    const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
-    if (!imageUrl) {
-        return "";
-    }
+  const imageUrlRegex = /image=([^;]+)/;
+  const imageUrlMatch = imageUrlRegex.exec(nodeStyle);
+  const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+  if (!imageUrl) {
+    return "";
+  }
 
-    const imageAltRegex = /alt=([^;]+)/;
-    const imageAltMatch = imageAltRegex.exec(nodeStyle);
-    const imageAlt = imageAltMatch ? imageAltMatch[1] : "Zark image";
+  const imageAltRegex = /alt=([^;]+)/;
+  const imageAltMatch = imageAltRegex.exec(nodeStyle);
+  const imageAlt = imageAltMatch ? imageAltMatch[1] : "Zark image";
 
-    let imageStyle = "";
-    const imageWidthRegex = /zarbAssetWidth=([^;]+)/;
-    const imageWidthMatch = imageWidthRegex.exec(nodeStyle);
-    const imageWidth = imageWidthMatch ? imageWidthMatch[1] : null;
-    imageStyle += `width: ${imageWidth};`;
+  let imageStyle = "";
+  const imageWidthRegex = /zarbAssetWidth=([^;]+)/;
+  const imageWidthMatch = imageWidthRegex.exec(nodeStyle);
+  const imageWidth = imageWidthMatch ? imageWidthMatch[1] : null;
+  imageStyle += `width: ${imageWidth};`;
 
-    const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : ("https://" + imageUrl);
-    return `<img src="${fullImageUrl}" alt="${imageAlt}" style="${imageStyle}">`;
-}
+  const fullImageUrl = imageUrl.startsWith("https://")
+    ? imageUrl
+    : "https://" + imageUrl;
+  return `<img src="${fullImageUrl}" alt="${imageAlt}" style="${imageStyle}">`;
+};
 
 export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
   const gameContainer = document.getElementById("game-container");
@@ -43,7 +45,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
     // currentNodeElement.textContent = `Current node: ${current_node}`;
     const nodeLabel = flowchartGraph.getNodeAttribute(current_node, "label");
     valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
-    
+
     const nodeStyle = flowchartGraph.getNodeAttribute(current_node, "style");
     valueElement.innerHTML += getImageTagFromNodeStyle(nodeStyle);
 
@@ -69,7 +71,10 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
       shouldPickRandom = shouldPickRandom && !hasLabel;
 
       const button = document.createElement("a");
-      const decodedOption = decodeHTMLEntities(option).replace(/<\/?div>|<br>/g, "");
+      const decodedOption = decodeHTMLEntities(option).replace(
+        /<\/?div>|<br>/g,
+        "",
+      );
       button.style.display = "block";
       button.tabIndex = 0;
       button.innerHTML = `&gt; ${decodedOption}`;
