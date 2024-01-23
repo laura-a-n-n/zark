@@ -9,6 +9,10 @@ const getImageTagFromNodeStyle = (nodeStyle: string) => {
         return "";
     }
 
+    const imageAltRegex = /alt=([^;]+)/;
+    const imageAltMatch = imageAltRegex.exec(nodeStyle);
+    const imageAlt = imageAltMatch ? imageAltMatch[1] : "Zark image";
+
     let imageStyle = "";
     const imageWidthRegex = /zarbAssetWidth=([^;]+)/;
     const imageWidthMatch = imageWidthRegex.exec(nodeStyle);
@@ -16,7 +20,7 @@ const getImageTagFromNodeStyle = (nodeStyle: string) => {
     imageStyle += `width: ${imageWidth};`;
 
     const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : ("https://" + imageUrl);
-    return `<img src="${fullImageUrl}" alt="Zark image" style="${imageStyle}">`;
+    return `<img src="${fullImageUrl}" alt="${imageAlt}" style="${imageStyle}">`;
 }
 
 export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
