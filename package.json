@@ -1,0 +1,22 @@
+{
+  "name": "zark",
+  "module": "src/index.ts",
+  "scripts": {
+    "serve": "live-server public",
+    "watch": "bun build src/zark.ts --outdir public --watch",
+    "compile": "bun build src/zark.ts --outdir public",
+    "pretty": "prettier --write \"./src/**/*.{js,json,jsx,ts,tsx,scss}\""
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "live-server": "1.2.1",
+    "prettier": "^3.2.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "dependencies": {
+    "fsp-xml-parser": "^1.0.0"
+  }
+}
