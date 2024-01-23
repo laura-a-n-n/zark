@@ -2309,6 +2309,21 @@ var decodeHTMLEntities = (text) => {
 };
 
 // src/game.ts
+var getImageTagFromNodeStyle = (nodeStyle) => {
+  const imageUrlRegex = /image=([^;]+)/;
+  const imageUrlMatch = imageUrlRegex.exec(nodeStyle);
+  const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+  if (!imageUrl) {
+    return "";
+  }
+  let imageStyle = "";
+  const imageWidthRegex = /zarbAssetWidth=([^;]+)/;
+  const imageWidthMatch = imageWidthRegex.exec(nodeStyle);
+  const imageWidth = imageWidthMatch ? imageWidthMatch[1] : null;
+  imageStyle += `width: ${imageWidth};`;
+  const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : "https://" + imageUrl;
+  return `<img src="${fullImageUrl}" alt="Zark image" style="${imageStyle}">`;
+};
 var getUpdateFunctionFromGraph = (flowchartGraph) => {
   const gameContainer = document.getElementById("game-container");
   const currentNodeElement = document.getElementById("current-node");
@@ -2322,13 +2337,7 @@ var getUpdateFunctionFromGraph = (flowchartGraph) => {
     const nodeLabel = flowchartGraph.getNodeAttribute(current_node, "label");
     valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
     const nodeStyle = flowchartGraph.getNodeAttribute(current_node, "style");
-    const imageUrlRegex = /image=([^;]+)/;
-    const match = imageUrlRegex.exec(nodeStyle);
-    const imageUrl = match ? match[1] : null;
-    if (imageUrl) {
-      const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : "https://" + imageUrl;
-      valueElement.innerHTML += `<img src="${fullImageUrl}" alt="Zark image">`;
-    }
+    valueElement.innerHTML += getImageTagFromNodeStyle(nodeStyle);
     const possibleDestinations = Array.from(flowchartGraph.outNeighbors(current_node));
     if (possibleDestinations.length === 0) {
       valueElement.innerHTML += "<p>[That's all for now.]</p>";

@@ -1,6 +1,24 @@
 import type { DirectedGraph } from "graphology";
 import { decodeHTMLEntities } from "./decode-html-entities";
 
+const getImageTagFromNodeStyle = (nodeStyle: string) => {
+    const imageUrlRegex = /image=([^;]+)/;
+    const imageUrlMatch = imageUrlRegex.exec(nodeStyle);
+    const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+    if (!imageUrl) {
+        return "";
+    }
+
+    let imageStyle = "";
+    const imageWidthRegex = /zarbAssetWidth=([^;]+)/;
+    const imageWidthMatch = imageWidthRegex.exec(nodeStyle);
+    const imageWidth = imageWidthMatch ? imageWidthMatch[1] : null;
+    imageStyle += `width: ${imageWidth};`;
+
+    const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : ("https://" + imageUrl);
+    return `<img src="${fullImageUrl}" alt="Zark image" style="${imageStyle}">`;
+}
+
 export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
   const gameContainer = document.getElementById("game-container");
   const currentNodeElement = document.getElementById("current-node");
@@ -23,13 +41,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
     valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
     
     const nodeStyle = flowchartGraph.getNodeAttribute(current_node, "style");
-    const imageUrlRegex = /image=([^;]+)/;
-    const match = imageUrlRegex.exec(nodeStyle);
-    const imageUrl = match ? match[1] : null;
-    if (imageUrl) {
-        const fullImageUrl = imageUrl.startsWith("https://") ? imageUrl : ("https://" + imageUrl);
-        valueElement.innerHTML += `<img src="${fullImageUrl}" alt="Zark image">`;
-    }
+    valueElement.innerHTML += getImageTagFromNodeStyle(nodeStyle);
 
     const possibleDestinations = Array.from(
       flowchartGraph.outNeighbors(current_node),
