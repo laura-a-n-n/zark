@@ -177,3 +177,4 @@ dist
 # Etc
 package-lock.json
 bun.lockb
+public/zark.js
