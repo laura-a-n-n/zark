@@ -17,6 +17,7 @@
   },
   "type": "module",
   "dependencies": {
-    "fsp-xml-parser": "^1.0.0"
+    "fsp-xml-parser": "^1.0.0",
+    "graphology": "^0.25.4"
   }
 }
