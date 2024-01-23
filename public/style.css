@@ -4,9 +4,25 @@ body {
     text-align: center;
     background-color: #000;
     color: #fff;
+    font-size: 20px;
+    line-height: 1.5em;
+}
+
+#game-container {
+    border: 2px solid #fff;
+    padding: 2em;
+    text-align: left;
+    margin: auto;
+    width: fit-content;
+    max-width: 75%;
 }
 
 img {
     display: block;
-    margin: auto;
+}
+
+a {
+    text-decoration: none;
+    color: #fff;
+    cursor: pointer;
 }

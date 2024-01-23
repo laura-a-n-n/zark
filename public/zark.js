@@ -2351,9 +2351,10 @@ var getUpdateFunctionFromGraph = (flowchartGraph) => {
       const hasLabel = "label" in edgeAttributes && edgeAttributes["label"];
       const option = hasLabel ? edgeAttributes["label"] : target;
       shouldPickRandom = shouldPickRandom && !hasLabel;
-      const button = document.createElement("button");
-      button.innerHTML = decodeHTMLEntities(option);
-      console.log(decodeHTMLEntities(option));
+      const button = document.createElement("a");
+      const decodedOption = decodeHTMLEntities(option).replace(/<\/?div>|<br>/g, "");
+      button.style.display = "block";
+      button.innerHTML = `&gt; ${decodedOption}`;
       button.addEventListener("click", () => {
         current_node = target;
         updateGame();
@@ -2363,9 +2364,9 @@ var getUpdateFunctionFromGraph = (flowchartGraph) => {
     if (shouldPickRandom) {
       const randomIndex = Math.floor(Math.random() * possibleDestinations.length);
       const randomTarget = possibleDestinations[randomIndex];
-      decisionsContainer.innerHTML = "";
-      const button = document.createElement("button");
-      button.innerHTML = "The only option is to continue...";
+      decisionsContainer.innerHTML = "<p>Decisions:</p>";
+      const button = document.createElement("a");
+      button.innerHTML = "&gt; The only option is to continue...";
       button.addEventListener("click", () => {
         current_node = randomTarget;
         updateGame();
