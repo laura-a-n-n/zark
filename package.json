@@ -5,6 +5,7 @@
     "serve": "live-server public",
     "watch": "bun build src/zark.ts --outdir public --watch",
     "compile": "bun build src/zark.ts --outdir public",
+    "start": "bun serve & bun watch",
     "pretty": "prettier --write \"./src/**/*.{js,json,jsx,ts,tsx,scss}\""
   },
   "devDependencies": {
