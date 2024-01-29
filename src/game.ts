@@ -30,7 +30,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
   const currentNodeElement = document.getElementById("current-node");
   const valueElement = document.getElementById("value");
   const decisionsContainer = document.getElementById("decisions");
-  let current_node = [...flowchartGraph.nodes()][0];
+  let currentNode = [...flowchartGraph.nodes()][0];
 
   return function updateGame() {
     if (
@@ -43,14 +43,14 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
     }
 
     // currentNodeElement.textContent = `Current node: ${current_node}`;
-    const nodeLabel = flowchartGraph.getNodeAttribute(current_node, "label");
+    const nodeLabel = flowchartGraph.getNodeAttribute(currentNode, "label");
     valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
 
-    const nodeStyle = flowchartGraph.getNodeAttribute(current_node, "style");
+    const nodeStyle = flowchartGraph.getNodeAttribute(currentNode, "style");
     valueElement.innerHTML += getImageTagFromNodeStyle(nodeStyle);
 
     const possibleDestinations = Array.from(
-      flowchartGraph.outNeighbors(current_node),
+      flowchartGraph.outNeighbors(currentNode),
     );
 
     if (possibleDestinations.length === 0) {
@@ -63,7 +63,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
     let shouldPickRandom = true;
     possibleDestinations.forEach((target) => {
       const edgeAttributes = flowchartGraph.getEdgeAttributes(
-        current_node,
+        currentNode,
         target,
       );
       const hasLabel = "label" in edgeAttributes && edgeAttributes["label"];
@@ -79,7 +79,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
       button.tabIndex = 0;
       button.innerHTML = `&gt; ${decodedOption}`;
       button.addEventListener("click", () => {
-        current_node = target;
+        currentNode = target;
         updateGame();
       });
       decisionsContainer.appendChild(button);
@@ -95,7 +95,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
       button.tabIndex = 0;
       button.innerHTML = "&gt; The only option is to continue...";
       button.addEventListener("click", () => {
-        current_node = randomTarget;
+        currentNode = randomTarget;
         updateGame();
       });
       decisionsContainer.appendChild(button);
