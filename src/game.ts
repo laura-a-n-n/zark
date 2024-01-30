@@ -1,6 +1,9 @@
 import type { DirectedGraph } from "graphology";
 import { decodeHTMLEntities } from "./decode-html-entities";
 
+const sanitizeNodeContent = (content: string) =>
+  decodeHTMLEntities(content.trim()).replace(/<\/?div>|<br>/g, "");
+
 const getImageTagFromNodeStyle = (nodeStyle: string) => {
   const imageUrlRegex = /image=([^;]+)/;
   const imageUrlMatch = imageUrlRegex.exec(nodeStyle);
@@ -45,10 +48,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
     if (!isSceneMarker) {
       return;
     }
-    const sceneName = decodeHTMLEntities(label.trim()).replace(
-      /<\/?div>|<br>/g,
-      "",
-    );
+    const sceneName = sanitizeNodeContent(label);
     sceneDict[sceneName] = node;
   });
 
@@ -83,7 +83,10 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
     // Process node
     const gotoIndex = nodeLabel.indexOf("GOTO:");
     if (gotoIndex >= 0) {
-      const gotoSceneName = nodeLabel.substring(gotoIndex + 5).trim();
+      const gotoSceneName = sanitizeNodeContent(
+        nodeLabel.substring(gotoIndex + 5),
+      );
+
       const gotoNode = gotoSceneName in sceneDict && sceneDict[gotoSceneName];
       if (gotoNode && flowchartGraph.hasNode(gotoNode)) {
         currentNode = gotoNode;
@@ -124,10 +127,7 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
       shouldPickRandom = shouldPickRandom && !hasLabel;
 
       const button = document.createElement("button");
-      const decodedOption = decodeHTMLEntities(option).replace(
-        /<\/?div>|<br>/g,
-        "",
-      );
+      const decodedOption = sanitizeNodeContent(option);
       button.style.display = "block";
       button.tabIndex = 0;
       button.innerHTML = `&gt; ${decodedOption}`;
