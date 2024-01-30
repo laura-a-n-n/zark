@@ -32,6 +32,26 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
   const decisionsContainer = document.getElementById("decisions");
   let currentNode = [...flowchartGraph.nodes()][0];
 
+  // Construct scene dict
+  const sceneDict: Record<string, string> = {};
+  flowchartGraph.forEachNode((node, attributes) => {
+    const label: string = attributes.label;
+    const style: string = attributes.style;
+    if (!label || !style) {
+      return;
+    }
+    const isSceneMarker =
+      style.indexOf("rhombus") >= 0 && label.indexOf("GOTO:") < 0;
+    if (!isSceneMarker) {
+      return;
+    }
+    const sceneName = decodeHTMLEntities(label.trim()).replace(
+      /<\/?div>|<br>/g,
+      "",
+    );
+    sceneDict[sceneName] = node;
+  });
+
   return function updateGame() {
     if (
       !gameContainer ||
@@ -42,12 +62,45 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
       throw new Error("Did not find expected DOM elements.");
     }
 
-    // currentNodeElement.textContent = `Current node: ${current_node}`;
-    const nodeLabel = flowchartGraph.getNodeAttribute(currentNode, "label");
-    valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
+    // Get node metadata
+    const nodeLabel: string = flowchartGraph.getNodeAttribute(
+      currentNode,
+      "label",
+    );
+    const nodeStyle: string = flowchartGraph.getNodeAttribute(
+      currentNode,
+      "style",
+    );
 
-    const nodeStyle = flowchartGraph.getNodeAttribute(currentNode, "style");
-    valueElement.innerHTML += getImageTagFromNodeStyle(nodeStyle);
+    let shouldRender = true;
+    let autoContinue = false;
+
+    if (nodeStyle.indexOf("rhombus") >= 0) {
+      shouldRender = false;
+      autoContinue = true;
+    }
+
+    // Process node
+    const gotoIndex = nodeLabel.indexOf("GOTO:");
+    if (gotoIndex >= 0) {
+      const gotoSceneName = nodeLabel.substring(gotoIndex + 5).trim();
+      const gotoNode = gotoSceneName in sceneDict && sceneDict[gotoSceneName];
+      if (gotoNode && flowchartGraph.hasNode(gotoNode)) {
+        currentNode = gotoNode;
+        updateGame();
+        return;
+      } else {
+        console.log(
+          `Psst, hey Squambo. The user just tried to go to ${gotoSceneName}, which gave node "${gotoNode}".`,
+        );
+      }
+    }
+
+    // Display node
+    if (shouldRender) {
+      valueElement.innerHTML = decodeHTMLEntities(nodeLabel);
+      valueElement.innerHTML += getImageTagFromNodeStyle(nodeStyle);
+    }
 
     const possibleDestinations = Array.from(
       flowchartGraph.outNeighbors(currentNode),
@@ -90,6 +143,12 @@ export const getUpdateFunctionFromGraph = (flowchartGraph: DirectedGraph) => {
         Math.random() * possibleDestinations.length,
       );
       const randomTarget = possibleDestinations[randomIndex];
+      if (autoContinue) {
+        currentNode = randomTarget;
+        updateGame();
+        return;
+      }
+
       decisionsContainer.innerHTML = "<p>Decisions:</p>";
       const button = document.createElement("button");
       button.tabIndex = 0;

@@ -67,7 +67,12 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
     const style = element.attributes.style;
     const isEdgeLabel = style && style.startsWith("edgeLabel");
 
-    if (isEdgeLabel && edgeId !== undefined && value !== undefined) {
+    if (
+      isEdgeLabel &&
+      edgeId !== undefined &&
+      value !== undefined &&
+      edgeId in edges
+    ) {
       const [source, target] = edges[edgeId];
       flowchartGraph.setEdgeAttribute(source, target, "label", value);
     }
