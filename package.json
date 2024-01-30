@@ -3,8 +3,8 @@
   "module": "src/index.ts",
   "scripts": {
     "serve": "live-server public",
-    "watch": "bun build src/zark.ts --outdir public --watch",
-    "compile": "bun build src/zark.ts --outdir public",
+    "watch": "bun build src/zark.ts --outdir public --minify --watch",
+    "compile": "bun build src/zark.ts --outdir public --minify",
     "start": "bun serve & bun watch",
     "pretty": "prettier --write \"./{src,test}/**/*.{js,json,jsx,ts,tsx,scss}\""
   },
