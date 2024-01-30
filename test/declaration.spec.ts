@@ -1,37 +1,31 @@
-import fs from "fs/promises";
-import path from "path";
-import { describe, test, expect, mock } from "bun:test";
+import { describe, test, expect, beforeAll } from "bun:test";
 import { parse, type XmlNode } from "fsp-xml-parser";
-import { getGraphFromFlowchartTree } from "../src/drawio-to-flowchart";
-import type { DirectedGraph } from "graphology";
 import { FILE_PATH, readXMLFile } from "./test-utils";
 
 describe("zark tree declaration", () => {
-  test("should exist", async () => {
-    const file = await readXMLFile(FILE_PATH);
-    expect(file).toBeDefined;
-  });
+  let file: string;
+  let zarkTree: XmlNode[] | undefined;
 
-  test("should parse just fine", async () => {
-    const file = await readXMLFile(FILE_PATH);
+  beforeAll(async () => {
+    file = await readXMLFile(FILE_PATH);
     const parsed = parse(file);
     expect(parsed.root).toBeDefined();
-
-    const zarkTree =
-      parsed.root?.children![0].children![0].children![0].children;
+    zarkTree =
+      parsed.root?.children?.[0]?.children?.[0]?.children?.[0]?.children;
     expect(zarkTree).toBeDefined();
   });
 
-  test("should have valid edges", async () => {
-    const file = await readXMLFile(FILE_PATH);
-    const parsed = parse(file);
-    expect(parsed.root).toBeDefined();
+  test("should exist", () => {
+    expect(file).toBeDefined();
+  });
 
-    const zarkTree =
-      parsed.root?.children![0].children![0].children![0].children;
+  test("should parse just fine", () => {
     expect(zarkTree).toBeDefined();
+  });
 
+  test("should have valid edges", () => {
     if (!zarkTree) {
+      expect(zarkTree).toBeDefined();
       return;
     }
 
@@ -39,15 +33,12 @@ describe("zark tree declaration", () => {
     let validEdgesCount = 0;
 
     for (const element of zarkTree) {
-      const id = element.attributes!.id;
-      const source = element.attributes!.source;
-      const target = element.attributes!.target;
-      const isEdge = element.attributes!.edge;
-  
-      if (isEdge) {
-        edgesCount += 1;
+      const { id, source, target, edge } = element.attributes || {};
+
+      if (edge) {
+        edgesCount++;
         if (!!source === !!target) {
-          validEdgesCount += 1;
+          validEdgesCount++;
         } else {
           console.log("Invalid edge detected!");
           console.log(`ID: ${id}`);
@@ -57,5 +48,5 @@ describe("zark tree declaration", () => {
     }
 
     expect(edgesCount).toEqual(validEdgesCount);
-  })
+  });
 });
