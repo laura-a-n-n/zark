@@ -10,17 +10,7 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
 
   // First, build nodes of the graph
   for (const element of tree) {
-    if (!element.attributes) {
-      // We don't care about elements that don't have any attributes.
-      // This is mostly to silence the type error.
-      continue;
-    }
-
-    const id = element.attributes.id;
-    const source = element.attributes.source;
-    const target = element.attributes.target;
-    const value = element.attributes.value;
-    const style = element.attributes.style;
+    const { id, source, target, value, style } = element.attributes || {};
     const isEdgeLabel = style && style.startsWith("edgeLabel");
 
     // Add vertex to graph
@@ -36,17 +26,9 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
 
   // Add edges to the graph
   for (const element of tree) {
-    if (!element.attributes) {
-      continue;
-    }
+    const { id, source, target, value, edge } = element.attributes || {};
 
-    const id = element.attributes.id;
-    const source = element.attributes.source;
-    const target = element.attributes.target;
-    const value = element.attributes.value;
-    const isEdge = element.attributes.edge;
-
-    if (isEdge && source !== undefined && target !== undefined) {
+    if (edge && source !== undefined && target !== undefined) {
       edges[id] = [source, target];
       if (value !== null) {
         flowchartGraph.addEdge(source, target, { label: value });
@@ -58,13 +40,7 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
 
   // Add edge labels to the graph
   for (const element of tree) {
-    if (!element.attributes) {
-      continue;
-    }
-
-    const edgeId = element.attributes.parent;
-    const value = element.attributes.value;
-    const style = element.attributes.style;
+    const { parent: edgeId, value, style } = element.attributes || {};
     const isEdgeLabel = style && style.startsWith("edgeLabel");
 
     if (
