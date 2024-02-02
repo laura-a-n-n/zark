@@ -10,11 +10,12 @@ export const getGraphFromFlowchartTree = (tree: XmlNode[]) => {
 
   // First, build nodes of the graph
   for (const element of tree) {
-    const { id, source, target, value, style } = element.attributes || {};
+    const { id, source, target, value, edge, style } = element.attributes || {};
     const isEdgeLabel = style && style.startsWith("edgeLabel");
 
     // Add vertex to graph
     if (
+      !edge &&
       !isEdgeLabel &&
       value !== undefined &&
       source === undefined &&
