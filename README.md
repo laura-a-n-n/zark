@@ -9,7 +9,9 @@
 3. Replace [public/assets/ZARK.drawio.xml](https://github.com/laura-a-n-n/zark/blob/dev/public/assets/ZARK.drawio.xml) with your XML file. Alternatively, you can just put it in that folder, and change the `FILE_PATH` in [src/zark.ts](https://github.com/laura-a-n-n/zark/blob/dev/src/zark.ts).
 4. Run `bun start`. You can now view your game by going to `localhost:8080` in your browser!
 
-You can now edit the HTML, CSS, and other assets in the `assets` folder as needed, and your changes will update live. 
+You can edit the HTML, CSS, and other assets in the `assets` folder as needed, and your changes will live-update.
+
+We leave the details of how exactly to make the right draw.io diagram as an exercise for the reader. (Maybe just look at the existing example.)
 
 ## how to install
 
